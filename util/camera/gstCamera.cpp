@@ -59,7 +59,7 @@ gstCamera::~gstCamera()
 
 
 // ConvertRGBA
-bool gstCamera::ConvertRGBA( void* input, void** output )
+bool gstCamera::ConvertRGBA( void* input, void** output, void** outputCPU )
 {
 	if( !input || !output )
 		return false;
@@ -68,7 +68,7 @@ bool gstCamera::ConvertRGBA( void* input, void** output )
 	{
 		for( uint32_t n=0; n < NUM_RINGBUFFERS; n++ )
 		{
-			if( CUDA_FAILED(cudaMalloc(&mRGBA[n], mWidth * mHeight * sizeof(float4))) )
+			if( !cudaAllocMapped(&mRGBACPU[n], &mRGBA[n], mWidth * mHeight * sizeof(float4)) )
 			{
 				printf(LOG_CUDA "gstCamera -- failed to allocate memory for %ux%u RGBA texture\n", mWidth, mHeight);
 				return false;
@@ -92,6 +92,7 @@ bool gstCamera::ConvertRGBA( void* input, void** output )
 	}
 	
 	*output     = mRGBA[mLatestRGBA];
+	*outputCPU = mRGBACPU[mLatestRGBA];
 	mLatestRGBA = (mLatestRGBA + 1) % NUM_RINGBUFFERS;
 	return true;
 }

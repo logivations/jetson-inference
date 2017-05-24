@@ -12,8 +12,8 @@ if( ${BUILD_DEPS} )
 	message("Launching pre-build dependency installer script...")
 
 	execute_process(COMMAND sh ../CMakePreBuild.sh
-				WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-				RESULT_VARIABLE PREBUILD_SCRIPT_RESULT)
+			WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+			RESULT_VARIABLE PREBUILD_SCRIPT_RESULT)
 
 	set(BUILD_DEPS "NO" CACHE BOOL "If YES, will install dependencies into sandbox.  Automatically reset to NO after dependencies are installed." FORCE)
 	message("Finished installing dependencies")
@@ -30,11 +30,11 @@ add_definitions(${QT_DEFINITIONS})
 find_package(CUDA)
 
 set(
-	CUDA_NVCC_FLAGS
-	${CUDA_NVCC_FLAGS}; 
-    -O3 
-	-gencode arch=compute_53,code=sm_53
-	-gencode arch=compute_62,code=sm_62
+		CUDA_NVCC_FLAGS
+		${CUDA_NVCC_FLAGS};
+		-O3
+		-gencode arch=compute_53,code=sm_53
+		-gencode arch=compute_62,code=sm_62
 )
 
 
@@ -60,9 +60,15 @@ include_directories(/usr/include/gstreamer-1.0 /usr/lib/aarch64-linux-gnu/gstrea
 file(GLOB inferenceSources *.cpp *.cu util/*.cpp util/camera/*.cpp util/cuda/*.cu util/display/*.cpp)
 file(GLOB inferenceIncludes *.h util/*.h util/camera/*.h util/cuda/*.h util/display/*.h)
 
-cuda_add_library(jetson-inference SHARED ${inferenceSources})
-target_link_libraries(jetson-inference nvcaffe_parser nvinfer Qt4::QtGui GL GLEW gstreamer-1.0 gstapp-1.0)		# gstreamer-0.10 gstbase-0.10 gstapp-0.10 
 
+
+
+cuda_add_library(jetson-inference SHARED ${inferenceSources})
+target_link_libraries(jetson-inference nvcaffe_parser nvinfer Qt4::QtGui GL GLEW gstreamer-1.0 gstapp-1.0)		# gstreamer-0.10 gstbase-0.10 gstapp-0.10
+target_link_libraries(jetson-inference Linear)
+
+include_directories(/usr/include/opencv)
+target_link_libraries(jetson-inference opencv_core opencv_highgui opencv_imgproc)
 
 # transfer all headers to the include directory
 foreach(include ${inferenceIncludes})
@@ -73,8 +79,8 @@ endforeach()
 
 # create symbolic link for network data
 execute_process( COMMAND "${CMAKE_COMMAND}" "-E" "create_symlink" "${PROJECT_SOURCE_DIR}/data/networks" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/networks" )
-  
-  
+
+
 # copy image data
 file(GLOB imageData ${PROJECT_SOURCE_DIR}/data/images/*)
 
@@ -102,12 +108,13 @@ add_subdirectory(util/camera/gst-camera)
 add_subdirectory(util/camera/v4l2-console)
 add_subdirectory(util/camera/v4l2-display)
 
+
 add_subdirectory(docs)
 
 
 # install
 foreach(include ${inferenceIncludes})
-    install(FILES "${include}" DESTINATION include/jetson-inference)
+	install(FILES "${include}" DESTINATION include/jetson-inference)
 endforeach()
 
 # install the shared library
@@ -115,4 +122,3 @@ install(TARGETS jetson-inference DESTINATION lib/jetson-inference EXPORT jetson-
 
 # install the cmake project, for importing
 install(EXPORT jetson-inferenceConfig DESTINATION share/jetson-inference/cmake)
-

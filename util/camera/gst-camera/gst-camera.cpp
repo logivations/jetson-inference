@@ -108,8 +108,9 @@ int main( int argc, char** argv )
 		
 		// convert from YUV to RGBA
 		void* imgRGBA = NULL;
+		void* imgRGBACPU = NULL;
 		
-		if( !camera->ConvertRGBA(imgCUDA, &imgRGBA) )
+		if( !camera->ConvertRGBA(imgCUDA, &imgRGBA, &imgRGBACPU) )
 			printf("gst-camera:  failed to convert from NV12 to RGBA\n");
 
 		// rescale image pixel intensities

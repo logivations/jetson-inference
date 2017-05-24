@@ -137,8 +137,8 @@ int main( int argc, char** argv )
 		
 		// convert from YUV to RGBA
 		void* imgRGBA = NULL;
-		
-		if( !camera->ConvertRGBA(imgCUDA, &imgRGBA) )
+		void* imgRGBACPU = NULL;
+		if( !camera->ConvertRGBA(imgCUDA, &imgRGBA, &imgRGBACPU) )
 			printf("imagenet-camera:  failed to convert from NV12 to RGBA\n");
 
 		// classify image

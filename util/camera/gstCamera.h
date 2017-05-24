@@ -36,7 +36,7 @@ public:
 	bool Capture( void** cpu, void** cuda, unsigned long timeout=ULONG_MAX );
 	
 	// Takes in captured YUV-NV12 CUDA image, converts to float4 RGBA (with pixel intensity 0-255)
-	bool ConvertRGBA( void* input, void** output );
+	bool ConvertRGBA( void* input, void** output, void** outputCPU );
 	
 	// Image dimensions
 	inline uint32_t GetWidth() const	  { return mWidth; }
@@ -86,9 +86,11 @@ private:
 	bool     mLatestRetrieved;
 	
 	void* mRGBA[NUM_RINGBUFFERS];
+	void* mRGBACPU[NUM_RINGBUFFERS];
 	int   mV4L2Device;	// -1 for onboard, >=0 for V4L2 device
 	
-	inline bool onboardCamera() const		{ return (mV4L2Device < 0); }
+	inline bool
+    onboardCamera() const		{ return (mV4L2Device < 0); }
 };
 
 #endif
